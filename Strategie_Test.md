@@ -1,49 +1,28 @@
-# 1. La stratègie de test : 
+# L'Analyse et la Conception des tests
 
-### 1. Vision et Objectifs de Qualité
-L'objectif de cette stratégie n'est pas seulement de valider l'application, mais de mettre en place un filet de sécurité automatisé, stable et maintenable. Il s'agit de protéger les flux générateurs de revenus (tunnel d'achat) tout en garantissant des retours rapides (Fast Feedback) en cas de régression.
 
-### 2. Approche Basée sur les Risques (Risk-Based Testing)
-L'effort d'automatisation et d'exécution est priorisé selon l'impact business et la probabilité de défaillance :
+On ne code jamais à l'aveugle. Avant d'écrire la moindre ligne de TypeScript, on doit concevoir la stratégie de test. C'est ce qu'on appelle définir le périmètre de couverture.
 
-Priorité Haute (P0 - Critique) : Authentification, ajout d'un article au panier, et tunnel d'achat (Checkout) de bout en bout. Action : Couverture automatisée maximale.
+Voici comment un Tech Lead ou une experte QA aborde la page de connexion (Login) d'une application comme SauceDemo.
 
-Priorité Moyenne (P1 - Majeure) : Gestion avancée du panier (retrait, modification, persistance des articles). Action : Validation des règles métiers et des cas limites.
+# Étape 1 : Les Partitions d'Équivalence (Ce que tu as commencé)
 
-Priorité Basse (P2 - Mineure) : Esthétique de l'interface et tris du catalogue. Action : Tests exploratoires initiaux.
-### 3. Architecture d'Automatisation (La touche "Experte Technique")
+On valide les classes de données.CT01 (Partition Valide) : standard_user + bon mot de passe.CT02 (Partition Invalide - Métier) : locked_out_user + bon mot de passe.
+CT03 (Partition Invalide - Saisie) : Login valide + mauvais mot de passe.
 
-Pour garantir un code de test propre, évolutif et résistant aux changements d'interface, la stack technique s'articule autour des choix suivants :
+# Étape 2 : L'Analyse des Valeurs LimitesMême si un login n'est 
 
-Framework : Automatisation via Playwright, privilégié pour sa gestion native de l'attente (auto-wait) qui limite les tests instables.
+pas un champ numérique, il a des limites physiques. Un développeur a pu oublier de gérer le cas où l'utilisateur clique sur "Login" sans rien taper.CT04 (Limite Basse - Champ vide) : Login vide + Mot de passe rempli (Vérifier le message "Username is required").CT05 (Limite Basse - Champ vide) : Login rempli + Mot de passe vide (Vérifier le message "Password is required").
 
-Design Pattern : Utilisation du Page Object Model (POM). Séparer la description des pages de la logique des tests garantit un code clair et réutilisable.
+# Étape 3 : La Table de Décision (Le cœur du métier QA)Les
 
-Sélecteurs fiables : Utilisation exclusive des attributs data-test natifs de SauceDemo pour s'affranchir des modifications CSS futures.
-# 2 . Plan de test  : 
-##  Périmètre de l'itération (Scope) : 
+ formulaires de connexion dépendent de la combinaison de plusieurs champs. La technique des tables de décisions est idéale pour modéliser une logique complexe. Au lieu d'écrire des tests au hasard, on croise systématiquement l'état du "Username" et du "Password" pour s'assurer qu'aucun trou critique n'a été laissé dans le code front-end ou back-end.  
 
-Fonctionnalités testées : Authentification, Ajout au panier, Tunnel de commande (Checkout).
-
-Environnement : [https://www.saucedemo.com/](https://www.saucedemo.com/)
-
-Comptes de test utilisés :
-
-Utilisateur valide : standard_user
-
-Utilisateur invalide : locked_out_user
-
-Mot de passe global : secret_sauce
-
-# Cas de Test Détaillés
-## 📋 Périmètre (Scope)
-*   **In Scope :** Authentification, Panier, Tunnel de commande (Checkout).
-*   **Environnement :** `https://www.saucedemo.com/`
-
-## 🧪 Rapport d'Exécution des Tests
-
-| ID | Objectif du Test | Étapes (Synthèse) | Résultat Attendu | Résultat Obtenu | Statut |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **TC-01** | Valider un achat complet (E2E) | Login > Ajouter article > Checkout > Finish | Message "Thank you for your order!" affiché. | Le message s'affiche correctement, redirection OK. | ✅ PASS |
-| **TC-02** | Bloquer l'accès compte verrouillé | Login `locked_out_user` > Clic "Login" | Message d'erreur "Epic sadface..." affiché. | Le message d'erreur rouge apparaît comme prévu. | ✅ PASS |
-| **TC-03** | Vérifier l'ajout/retrait du panier | Ajouter article > Vérifier badge > Retirer article | Le badge s'incrémente à "1" puis disparaît. | Le comportement du badge est conforme. | ✅ PASS |
+| Cas de Test | État du Username | État du Password | Résultat Attendu (Assertion / Expect) |
+| :--- | :--- | :--- | :--- |
+| **CT01** | Valide (`standard_user`) | Valide | Succès -> Redirection vers `/inventory.html` |
+| **CT02** | Bloqué (`locked_out_user`) | Valide | Échec -> Message "Sorry, this user has been locked out" |
+| **CT03** | Valide | Invalide | Échec -> Message "Username and password do not match" |
+| **CT04** | Vide | Valide | Échec -> Message "Username is required" |
+| **CT05** | Valide | Vide | Échec -> Message "Password is required" |
+| **CT06** | Vide | Vide | Échec -> Message "Username is required" |

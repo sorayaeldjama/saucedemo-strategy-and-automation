@@ -1,0 +1,22 @@
+{
+  "name": "test_automation_sauce_demo",
+  "version": "1.0.0",
+  "main": "playwrightTest.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sorayaeldjama/saucedemo-strategy-and-automation.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sorayaeldjama/saucedemo-strategy-and-automation/issues"
+  },
+  "homepage": "https://github.com/sorayaeldjama/saucedemo-strategy-and-automation#readme",
+  "description": "",
+  "devDependencies": {
+    "@playwright/test": "^1.61.1",
+    "@types/node": "^26.0.1"
+  }
+}
